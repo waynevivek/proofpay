@@ -1,0 +1,1 @@
+"""ProofPay backend application package."""

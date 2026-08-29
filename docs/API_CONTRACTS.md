@@ -9,7 +9,7 @@ change mid-build, update this file in the same commit as the code change.
 
 ### `POST /documents/upload`
 Uploads and extracts a single document.
-- **Request:** multipart file + `doc_type` (`po | invoice | grn | delivery_proof | acceptance_proof | gst_info`)
+- **Request (current JSON stub):** query parameter `doc_type` (`po | invoice | grn | delivery_proof | acceptance_proof | gst_info`) plus the raw normalized document JSON as the request body. Real multipart file upload/OCR is deferred.
 - **Response:** the extracted structured JSON for that doc type (see DATA_MODEL.md)
 
 ## Transactions

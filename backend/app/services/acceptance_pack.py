@@ -1,0 +1,1 @@
+"""Acceptance-pack assembly placeholder."""

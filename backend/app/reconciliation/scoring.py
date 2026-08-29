@@ -1,0 +1,1 @@
+"""Payment-readiness scoring placeholder."""
