@@ -99,3 +99,37 @@ class TransactionSummary(StrictModel):
     status: Literal["uploaded", "reconciled"]
     verdict: str | None = None
     readiness_score: int | None = None
+
+
+class ReconciliationFlag(StrictModel):
+    field: str
+    po_value: int | float | str | None = None
+    grn_value: int | float | str | None = None
+    invoice_value: int | float | str | None = None
+    discrepancy_type: str
+    amount_at_risk: float = Field(ge=0)
+    source_docs: list[str]
+
+
+class ReconciliationResult(StrictModel):
+    transaction_id: str
+    verdict: Literal["verified", "risk", "partial"]
+    readiness_score: int = Field(ge=0, le=100)
+    flags: list[ReconciliationFlag]
+    missing_evidence: list[str]
+    recommended_action: str
+    draft_message: str | None
+
+
+class AcceptancePackSummary(StrictModel):
+    verdict: Literal["verified", "risk", "partial"]
+    readiness_score: int = Field(ge=0, le=100)
+
+
+class AcceptancePack(StrictModel):
+    transaction_id: str
+    summary: AcceptancePackSummary
+    flags: list[ReconciliationFlag]
+    missing_evidence: list[str]
+    recommended_action: str
+    draft_message: str | None

@@ -99,6 +99,16 @@ async def list_transactions(db: Session = Depends(get_db)) -> JSONResponse:
         TransactionSummary(
             transaction_id=transaction.transaction_id,
             status=transaction.status,
+            verdict=(
+                transaction.reconciliation_result.result.get("verdict")
+                if transaction.reconciliation_result is not None
+                else None
+            ),
+            readiness_score=(
+                transaction.reconciliation_result.result.get("readiness_score")
+                if transaction.reconciliation_result is not None
+                else None
+            ),
         ).model_dump(mode="json", exclude_none=True)
         for transaction in transactions
     ]

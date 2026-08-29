@@ -14,6 +14,9 @@ their own test JSON mid-build.
    Expected: `verdict: risk`, flag on `price`.
 4. **Date mismatch** — GRN or delivery date falls outside an agreed delivery window.
    Expected: `verdict: risk` or `partial` depending on severity.
+   The current deterministic demo rule treats the delivery window as the PO date through
+   30 calendar days after it; this keeps the rule explicit because the frozen document shape
+   does not contain a separate delivery-window field.
 5. **Missing evidence** — all quantities/prices agree, but one required document (typically
    acceptance proof) is absent.
    Expected: `verdict: partial`, `readiness_score` in the 75-90% band, `missing_evidence` populated.

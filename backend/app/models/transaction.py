@@ -18,6 +18,7 @@ if TYPE_CHECKING:
         Invoice,
         PurchaseOrder,
     )
+    from app.models.reconciliation import ReconciliationResultRecord
 
 
 class Transaction(Base):
@@ -55,3 +56,9 @@ class Transaction(Base):
     delivery_proof: Mapped["DeliveryProof | None"] = relationship(lazy="joined")
     acceptance_proof: Mapped["AcceptanceProof | None"] = relationship(lazy="joined")
     gst_info: Mapped["GSTInfo | None"] = relationship(lazy="joined")
+    reconciliation_result: Mapped["ReconciliationResultRecord | None"] = relationship(
+        back_populates="transaction",
+        uselist=False,
+        cascade="all, delete-orphan",
+        lazy="joined",
+    )

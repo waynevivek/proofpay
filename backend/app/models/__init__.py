@@ -9,6 +9,7 @@ from app.models.documents import (
     PurchaseOrder,
 )
 from app.models.transaction import Transaction
+from app.models.reconciliation import ReconciliationResultRecord
 
 __all__ = [
     "AcceptanceProof",
@@ -18,4 +19,5 @@ __all__ = [
     "Invoice",
     "PurchaseOrder",
     "Transaction",
+    "ReconciliationResultRecord",
 ]

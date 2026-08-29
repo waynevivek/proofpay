@@ -8,6 +8,7 @@ from app.models import (  # noqa: F401 - imports register models with Base.metad
     GRN,
     Invoice,
     PurchaseOrder,
+    ReconciliationResultRecord,
     Transaction,
 )
 

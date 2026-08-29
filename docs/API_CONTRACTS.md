@@ -35,11 +35,14 @@ Runs the reconciliation engine on the transaction's documents.
 Returns the formatted Acceptance Pack — summary, flags, missing evidence, recommended action,
 draft message — ready for the UI to render as the final output panel. Requires `/reconcile`
 to have already run; returns 409 if not yet reconciled.
+- **Response:** `{ "transaction_id": "...", "summary": { "verdict": "verified | risk | partial", "readiness_score": 100 }, "flags": [], "missing_evidence": [], "recommended_action": "...", "draft_message": "...|null" }`
 
 ### `POST /transactions/{id}/draft-message`
 Regenerates the clarification draft message on demand (e.g. if the user edits tone/recipient).
 - **Request:** `{ "recipient": "string, optional" }`
 - **Response:** `{ "draft_message": "string" }`
+- Returns 409 with `code: "not_reconciled"` if reconciliation has not run, or
+  `code: "no_draft_needed"` for a verified transaction with no clarification needed.
 
 ## Error shape (all endpoints)
 
