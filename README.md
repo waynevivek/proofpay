@@ -55,9 +55,11 @@ npm run dev
 ```
 
 The frontend uses `http://localhost:8000/api/v1` by default. Set
-`NEXT_PUBLIC_API_BASE_URL` when the API runs elsewhere. From **New Acceptance Check**, choose
-one of the synthetic scenarios or import a normalized transaction JSON fixture; the UI then
-uploads the documents, creates the transaction, reconciles it, and displays the API result.
+`NEXT_PUBLIC_API_BASE_URL` when the API runs elsewhere. Set `FRONTEND_ORIGINS` on the backend
+to the frontend origin when deploying (comma-separated for multiple origins). From **New
+Acceptance Check**, choose one of the synthetic scenarios or import a normalized transaction
+JSON fixture; the UI then uploads the documents, creates the transaction, reconciles it, and
+displays the API result.
 
 Useful checks:
 

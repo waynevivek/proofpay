@@ -1,6 +1,7 @@
 """FastAPI application entrypoint for ProofPay."""
 
 from contextlib import asynccontextmanager
+import os
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
@@ -20,12 +21,18 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title="ProofPay API", version="v1", lifespan=lifespan)
 
+frontend_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "FRONTEND_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000",
+    ).split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=frontend_origins,
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type"],
