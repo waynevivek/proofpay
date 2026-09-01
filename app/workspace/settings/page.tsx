@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { WorkspaceShell } from '@/proofpay/components/workspace/sidebar'
-import { Button } from '@/proofpay/components/ui/button'
+import { WorkspaceShell } from '@/components/workspace/sidebar'
+import { Button } from '@/components/ui/button'
 
 export default function SettingsPage() {
   const [workspaceName, setWorkspaceName] = useState('Bengaluru')

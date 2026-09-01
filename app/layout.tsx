@@ -1,8 +1,3 @@
-declare module '*.css' {
-  const content: { [key: string]: string }
-  export default content
-}
-
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 

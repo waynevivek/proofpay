@@ -47,3 +47,13 @@ it through `data/generator/generate_synthetic_docs.py` rather than hand-writing 
 Prefer the smaller, more reliable implementation over the more ambitious one — this is a
 24-hour hackathon build (see `docs/BUILD_TIMELINE.md`), and a demo that works end-to-end on 3
 scenarios beats one that half-works on 10.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

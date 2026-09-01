@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "build": "next build --webpack",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test:backend": "PYTHONPATH=backend python -m unittest discover -s backend/tests -v"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

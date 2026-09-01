@@ -1,21 +1,43 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ChevronRight, Plus } from 'lucide-react'
-import { WorkspaceShell } from '@/proofpay/components/workspace/sidebar'
-import { Button } from '@/proofpay/components/ui/button'
-import { checkList } from '@/proofpay/lib/workspace-data'
+import { WorkspaceShell } from '@/components/workspace/sidebar'
+import { Button } from '@/components/ui/button'
+import { ApiError, getWorkspaceChecks, type WorkspaceCheck } from '@/lib/api'
 
-const filters = ['All', 'Ready', 'Review'] as const
+const filters = ['All', 'Ready', 'Review', 'Pending'] as const
 
 export default function ChecksListPage() {
   const [filter, setFilter] = useState<(typeof filters)[number]>('All')
+  const [checks, setChecks] = useState<WorkspaceCheck[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const filtered = checkList.filter((c) => {
+  useEffect(() => {
+    let active = true
+    getWorkspaceChecks()
+      .then((loaded) => {
+        if (active) setChecks(loaded)
+      })
+      .catch((reason) => {
+        if (!active) return
+        setError(reason instanceof ApiError ? reason.message : 'Could not load checks.')
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const filtered = checks.filter((check) => {
     if (filter === 'All') return true
-    if (filter === 'Ready') return c.status === 'ready'
-    return c.status === 'review'
+    if (filter === 'Ready') return check.status === 'ready'
+    if (filter === 'Review') return check.status === 'review'
+    return check.status === 'pending'
   })
 
   return (
@@ -35,39 +57,45 @@ export default function ChecksListPage() {
         </Link>
       </div>
 
-      <div className="mt-8 flex gap-2">
-        {filters.map((f) => (
+      <div className="mt-8 flex flex-wrap gap-2">
+        {filters.map((option) => (
           <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`req-chip ${filter === f ? 'done' : ''}`}
+            key={option}
+            onClick={() => setFilter(option)}
+            className={`req-chip ${filter === option ? 'done' : ''}`}
             style={{ borderRadius: 999 }}
           >
-            {f}
+            {option}
           </button>
         ))}
       </div>
 
       <div className="transaction-table mt-6">
-        {filtered.map((c) => (
-          <Link key={c.id} href={`/workspace/checks/${c.id}`} className="transaction-row">
+        {loading && <p className="p-8 text-center text-sm text-muted-foreground">Loading checks…</p>}
+        {error && <p className="p-6 text-sm text-destructive">{error}</p>}
+        {filtered.map((check) => (
+          <Link key={check.id} href={`/workspace/checks/${check.id}`} className="transaction-row">
             <div className="tx-id">
-              {c.invoice}
-              <small>{c.status === 'review' ? 'Review' : 'Verified'}</small>
+              {check.invoice}
+              <small>{check.statusLabel}</small>
             </div>
             <div className="tx-buyer">
-              <strong>{c.buyer}</strong>
-              <small>{c.amount}</small>
+              <strong>{check.buyer}</strong>
+              <small>{check.amount}</small>
             </div>
             <div className="tx-readiness">
-              <span className={`readiness ${c.status === 'review' ? 'amber' : 'green'}`}>{c.status === 'review' ? '80%' : '100%'}</span>
+              <span className={`readiness ${check.status === 'review' ? 'amber' : check.status === 'pending' ? 'slate' : 'green'}`}>
+                {check.readiness_score != null ? `${check.readiness_score}%` : '—'}
+              </span>
               <small>readiness</small>
             </div>
-            <div className={`badge ${c.status === 'review' ? 'badge-amber' : 'badge-green'}`}>{c.statusLabel}</div>
+            <div className={`badge ${check.status === 'review' ? 'badge-amber' : check.status === 'pending' ? 'badge-slate' : 'badge-green'}`}>
+              {check.statusLabel}
+            </div>
             <ChevronRight className="tx-arrow" size={18} />
           </Link>
         ))}
-        {filtered.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">No checks in this filter.</p>}
+        {!loading && !error && filtered.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">No checks in this filter.</p>}
       </div>
     </WorkspaceShell>
   )

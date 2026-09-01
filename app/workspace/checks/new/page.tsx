@@ -5,121 +5,157 @@ import { useRouter } from 'next/navigation'
 import {
   ArrowRight,
   Check,
-  ClipboardCheck,
   FileCheck2,
   FileText,
   PackageCheck,
-  Plus,
   Sparkles,
   Upload,
 } from 'lucide-react'
-import { WorkspaceShell } from '@/proofpay/components/workspace/sidebar'
-import { Button } from '@/proofpay/components/ui/button'
+import { WorkspaceShell } from '@/components/workspace/sidebar'
+import { Button } from '@/components/ui/button'
+import {
+  ApiError,
+  createFromFixture,
+  type FixtureTransaction,
+} from '@/lib/api'
+import cleanFixture from '@/data/synthetic/clean/txn_1.json'
+import quantityFixture from '@/data/synthetic/qty_mismatch/txn_1.json'
+import priceFixture from '@/data/synthetic/price_mismatch/txn_1.json'
+import dateFixture from '@/data/synthetic/date_mismatch/txn_1.json'
+import missingEvidenceFixture from '@/data/synthetic/missing_evidence/txn_1.json'
 
-const required = [
-  { id: 'po', label: 'Purchase Order', icon: FileText },
-  { id: 'invoice', label: 'Invoice', icon: FileCheck2 },
-  { id: 'challan', label: 'Delivery Challan', icon: PackageCheck },
-  { id: 'grn', label: 'GRN / Acceptance', icon: ClipboardCheck },
-]
+const scenarios = {
+  clean: { label: 'Clean match', fixture: cleanFixture as FixtureTransaction },
+  qty_mismatch: { label: 'Quantity mismatch', fixture: quantityFixture as FixtureTransaction },
+  price_mismatch: { label: 'Price mismatch', fixture: priceFixture as FixtureTransaction },
+  date_mismatch: { label: 'Date mismatch', fixture: dateFixture as FixtureTransaction },
+  missing_evidence: { label: 'Missing acceptance evidence', fixture: missingEvidenceFixture as FixtureTransaction },
+} as const
 
-const optional = [
-  { id: 'proof', label: 'Delivery Proof' },
-  { id: 'thread', label: 'Email / WhatsApp Thread' },
-]
+type Scenario = keyof typeof scenarios
 
 export default function NewCheckPage() {
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
+  const [scenario, setScenario] = useState<Scenario>('qty_mismatch')
+  const [importedFixture, setImportedFixture] = useState<FixtureTransaction | null>(null)
+  const [fileName, setFileName] = useState<string | null>(null)
   const [dragActive, setDragActive] = useState(false)
-  const [files, setFiles] = useState<string[]>([])
-  const [optIncluded, setOptIncluded] = useState<string[]>([])
+  const [running, setRunning] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  function addFiles(list: FileList | null) {
-    if (!list) return
-    setFiles((f) => [...f, ...Array.from(list).map((file) => file.name)])
+  async function readFixture(file: File | null) {
+    if (!file) return
+    setError(null)
+    setFileName(file.name)
+    if (!file.name.toLowerCase().endsWith('.json')) {
+      setImportedFixture(null)
+      setError('The current API contract accepts normalized JSON documents. Choose a .json fixture.')
+      return
+    }
+
+    try {
+      const parsed = JSON.parse(await file.text()) as FixtureTransaction
+      if (!parsed.po || !parsed.invoice || !parsed.grn) {
+        throw new Error('A transaction fixture must include po, invoice, and grn documents.')
+      }
+      setImportedFixture(parsed)
+    } catch (reason) {
+      setImportedFixture(null)
+      setError(reason instanceof Error ? reason.message : 'Could not read that JSON fixture.')
+    }
   }
+
+  async function runFixture(fixture: FixtureTransaction) {
+    setRunning(true)
+    setError(null)
+    try {
+      const { transaction } = await createFromFixture(fixture)
+      router.push(`/workspace/checks/${transaction.transaction_id}`)
+    } catch (reason) {
+      setError(reason instanceof ApiError ? reason.message : 'Could not create this acceptance check.')
+      setRunning(false)
+    }
+  }
+
+  const selectedFixture = importedFixture ?? scenarios[scenario].fixture
+  const selectedLabel = importedFixture ? fileName ?? 'Imported fixture' : scenarios[scenario].label
+  const documentCount = [
+    selectedFixture.po,
+    selectedFixture.invoice,
+    selectedFixture.grn,
+    selectedFixture.delivery_proof,
+    selectedFixture.acceptance_proof,
+    selectedFixture.gst_info,
+  ].filter(Boolean).length
 
   return (
     <WorkspaceShell>
       <div className="eyebrow">
         <span className="eyebrow-line" /> New acceptance check
       </div>
-      <h1 className="page-title mt-4 text-[2.4rem]">Upload transaction evidence.</h1>
-      <p className="mt-3 max-w-xl text-muted-foreground">Drop in the documents for this transaction and ProofPay will reconcile them automatically.</p>
+      <h1 className="page-title mt-4 text-[2.4rem]">Run a real evidence check.</h1>
+      <p className="mt-3 max-w-xl text-muted-foreground">
+        Choose a synthetic transaction or import a normalized JSON fixture. ProofPay uploads each document, creates the transaction, and runs reconciliation through the live API.
+      </p>
 
       <div
         className={`dropzone mt-9 ${dragActive ? 'active' : ''}`}
         onClick={() => inputRef.current?.click()}
-        onDragOver={(e) => {
-          e.preventDefault()
+        onDragOver={(event) => {
+          event.preventDefault()
           setDragActive(true)
         }}
         onDragLeave={() => setDragActive(false)}
-        onDrop={(e) => {
-          e.preventDefault()
+        onDrop={(event) => {
+          event.preventDefault()
           setDragActive(false)
-          addFiles(e.dataTransfer.files)
+          void readFixture(event.dataTransfer.files[0] ?? null)
         }}
       >
-        <span className="dropzone-icon">
-          <Upload size={20} />
-        </span>
-        <strong className="text-base font-semibold">Upload documents</strong>
-        <span className="text-sm text-muted-foreground">Drag &amp; drop or browse files</span>
-        <span className="font-mono text-[11px] uppercase tracking-[.08em] text-muted-foreground">PDF · PNG · JPG · XLSX</span>
-        <input ref={inputRef} type="file" multiple hidden onChange={(e) => addFiles(e.target.files)} />
+        <span className="dropzone-icon"><Upload size={20} /></span>
+        <strong className="text-base font-semibold">Import normalized JSON</strong>
+        <span className="text-sm text-muted-foreground">Drag &amp; drop or browse a transaction fixture</span>
+        <span className="font-mono text-[11px] uppercase tracking-[.08em] text-muted-foreground">JSON · API contract v1</span>
+        <input ref={inputRef} type="file" accept=".json,application/json" hidden onChange={(event) => void readFixture(event.target.files?.[0] ?? null)} />
       </div>
-
-      {files.length > 0 && (
-        <div className="mt-4 flex flex-col gap-2">
-          {files.map((name, i) => (
-            <div key={i} className="uploaded-file">
-              <FileText size={14} className="text-primary" /> {name}
-            </div>
-          ))}
-        </div>
-      )}
 
       <div className="mt-9">
-        <div className="section-kicker">Required documents</div>
-        <div className="mt-3 flex flex-wrap gap-2.5">
-          {required.map((r) => (
-            <span key={r.id} className="req-chip done">
-              <Check size={13} /> {r.label}
-            </span>
+        <div className="section-kicker">Or run a synthetic scenario</div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {(Object.keys(scenarios) as Scenario[]).map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => {
+                setScenario(key)
+                setImportedFixture(null)
+                setFileName(null)
+                setError(null)
+              }}
+              className={`doc-select ${!importedFixture && scenario === key ? 'selected' : ''}`}
+            >
+              <span className="doc-icon blue"><FileText size={18} /></span>
+              <span className="min-w-0 text-left"><strong>{scenarios[key].label}</strong><small>{scenarios[key].fixture.transaction_id}</small></span>
+              <span className={`check-box ${!importedFixture && scenario === key ? 'checked' : ''}`}>{!importedFixture && scenario === key && <Check size={13} />}</span>
+            </button>
           ))}
         </div>
       </div>
 
-      <div className="mt-6">
-        <div className="section-kicker">Optional</div>
-        <div className="mt-3 flex flex-wrap gap-2.5">
-          {optional.map((o) => {
-            const included = optIncluded.includes(o.id)
-            return (
-              <button
-                key={o.id}
-                onClick={() => setOptIncluded((s) => (included ? s.filter((id) => id !== o.id) : [...s, o.id]))}
-                className={`opt-chip ${included ? 'done' : ''}`}
-              >
-                {included ? <Check size={13} /> : <Plus size={13} />} {o.label}
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      <div className="sample-note mt-8">
+      <div className="sample-note mt-6">
         <Sparkles size={16} />
         <span>
-          This demo uses a pre-built mismatch: <strong>100 units invoiced, 80 accepted.</strong>
+          Selected: <strong>{selectedLabel}</strong> · {documentCount} document{documentCount === 1 ? '' : 's'} will be uploaded. No email or WhatsApp message is sent automatically.
         </span>
       </div>
 
+      {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
+
       <div className="mt-8 flex justify-end">
-        <Button onClick={() => router.push('/workspace/checks/inv-091')} className="rounded-full">
-          Start Acceptance Check <ArrowRight data-icon="inline-end" />
+        <Button disabled={running} onClick={() => void runFixture(selectedFixture)} className="rounded-full">
+          {running ? 'Running check…' : 'Start acceptance check'}
+          {!running && <ArrowRight data-icon="inline-end" />}
         </Button>
       </div>
     </WorkspaceShell>

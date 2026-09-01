@@ -39,3 +39,30 @@ Read in this order before writing any code:
 - **Every flag must be source-linked.** If the reconciliation engine says "8 units unsupported,"
   the UI must show which document and which field that came from. This is the core USP —
   don't let it slip during crunch.
+
+## Run locally
+
+Start the API and frontend in separate terminals:
+
+```bash
+cd backend
+PYTHONPATH=. python -m uvicorn app.main:app --reload --port 8000
+```
+
+```bash
+npm install
+npm run dev
+```
+
+The frontend uses `http://localhost:8000/api/v1` by default. Set
+`NEXT_PUBLIC_API_BASE_URL` when the API runs elsewhere. From **New Acceptance Check**, choose
+one of the synthetic scenarios or import a normalized transaction JSON fixture; the UI then
+uploads the documents, creates the transaction, reconciles it, and displays the API result.
+
+Useful checks:
+
+```bash
+npm run typecheck
+npm run test:backend
+npm run build
+```

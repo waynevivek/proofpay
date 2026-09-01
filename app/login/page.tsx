@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowRight, ShieldCheck } from 'lucide-react'
-import { Button } from '@/proofpay/components/ui/button'
+import { Button } from '@/components/ui/button'
 
 export default function LoginPage() {
   const router = useRouter()
