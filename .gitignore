@@ -25,3 +25,4 @@ backend/.venv/
 # Database — never commit the SQLite file
 backend/proofpay.db
 *.db
+
