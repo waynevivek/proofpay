@@ -1,0 +1,66 @@
+{
+  "transaction_id": "TXN-DATE-001",
+  "po": {
+    "po_id": "PO-DATE-001",
+    "date": "2026-08-01",
+    "buyer": "Acme Manufacturing Pvt Ltd",
+    "supplier": "SteelWorks India Pvt Ltd",
+    "line_items": [
+      {
+        "item": "Steel rods",
+        "qty": 100,
+        "rate": 500,
+        "amount": 50000
+      }
+    ],
+    "total_amount": 50000
+  },
+  "invoice": {
+    "invoice_id": "INV-DATE-001",
+    "po_ref": "PO-DATE-001",
+    "date": "2026-08-11",
+    "gstin": "27DATE001ABCDE1",
+    "line_items": [
+      {
+        "item": "Steel rods",
+        "qty": 100,
+        "rate": 500,
+        "amount": 50000
+      }
+    ],
+    "total_amount": 50000
+  },
+  "grn": {
+    "grn_id": "GRN-DATE-001",
+    "po_ref": "PO-DATE-001",
+    "date": "2026-09-15",
+    "line_items": [
+      {
+        "item": "Steel rods",
+        "qty_received": 100
+      }
+    ],
+    "receiving_party": "Acme Manufacturing Warehouse"
+  },
+  "delivery_proof": {
+    "proof_id": "DC-DATE-001",
+    "ref_id": "INV-DATE-001",
+    "type": "delivery",
+    "date": "2026-09-15",
+    "signed_by": "Ravi Kumar",
+    "status": "present"
+  },
+  "acceptance_proof": {
+    "proof_id": "AC-DATE-001",
+    "ref_id": "INV-DATE-001",
+    "type": "acceptance",
+    "date": "2026-08-11",
+    "signed_by": "Neha Sharma",
+    "status": "present"
+  },
+  "gst_info": {
+    "gstin": "27DATE001ABCDE1",
+    "validity_status": "valid"
+  },
+  "status": "uploaded"
+}
