@@ -15,4 +15,3 @@ services:
       # Database: SQLite for demo. Replace value with a postgres:// URL for persistence.
       - key: DATABASE_URL
         value: sqlite:///./proofpay.db
-
