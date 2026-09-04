@@ -6,12 +6,13 @@ import Link from 'next/link'
 import { ArrowRight, ShieldCheck, Lock, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter()
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  function handleSignIn(e: React.FormEvent) {
+  function handleCreateAccount(e: React.FormEvent) {
     e.preventDefault()
     router.push('/workspace')
   }
@@ -42,12 +43,12 @@ export default function LoginPage() {
               letterSpacing: '-0.055em',
               margin: 0,
             }}>
-              Sign in to keep<br />
-              the paper trail{' '}
-              <em>honest.</em>
+              Stop chasing.<br />
+              Start verifying with{' '}
+              <em>proof.</em>
             </h1>
             <p style={{ marginTop: '24px', fontSize: '15px', lineHeight: 1.65, color: 'var(--muted-foreground)', maxWidth: '340px' }}>
-              Your checks, evidence, and drafted clarifications — right where you left them.
+              Upload your documents, let ProofPay reconcile the details, and know exactly where every payment stands.
             </p>
             <div style={{ marginTop: '36px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--muted-foreground)' }}>
@@ -62,11 +63,23 @@ export default function LoginPage() {
           {/* Right – auth card */}
           <div style={{ width: '360px', flexShrink: 0 }}>
             <div className="auth-card">
-              <p className="label">Workspace Access</p>
-              <h2 style={{ marginTop: '8px', fontSize: '1.7rem', fontWeight: 600, letterSpacing: '-0.03em', lineHeight: 1.2 }}>Welcome back</h2>
-              <p style={{ marginTop: '6px', fontSize: '14px', color: 'var(--muted-foreground)' }}>Sign in to your ProofPay workspace</p>
+              <p className="label">Get Started Free</p>
+              <h2 style={{ marginTop: '8px', fontSize: '1.7rem', fontWeight: 600, letterSpacing: '-0.03em', lineHeight: 1.2 }}>Create your account</h2>
+              <p style={{ marginTop: '6px', fontSize: '14px', color: 'var(--muted-foreground)' }}>Start verifying payments in minutes.</p>
 
-              <form onSubmit={handleSignIn} style={{ marginTop: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <form onSubmit={handleCreateAccount} style={{ marginTop: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div className="field-group">
+                  <label htmlFor="full-name" className="label">Full name</label>
+                  <input
+                    id="full-name"
+                    type="text"
+                    required
+                    placeholder="Priya Mehta"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    className="field-input"
+                  />
+                </div>
                 <div className="field-group">
                   <label htmlFor="email" className="label">Work email</label>
                   <input
@@ -80,10 +93,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <div className="field-group">
-                  <div className="field-row-top">
-                    <label htmlFor="password" className="label">Password</label>
-                    <button type="button" style={{ fontSize: '12px', fontWeight: 500, color: 'var(--primary)', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>Forgot?</button>
-                  </div>
+                  <label htmlFor="password" className="label">Password</label>
                   <input
                     id="password"
                     type="password"
@@ -95,14 +105,14 @@ export default function LoginPage() {
                   />
                 </div>
                 <Button type="submit" className="mt-1 h-11 w-full rounded-full">
-                  Sign in <ArrowRight data-icon="inline-end" />
+                  Create account <ArrowRight data-icon="inline-end" />
                 </Button>
               </form>
 
               <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '14px', color: 'var(--muted-foreground)' }}>
-                Don&apos;t have an account?{' '}
-                <Link href="/signup" style={{ fontWeight: 500, color: 'var(--foreground)', textDecoration: 'underline', textDecorationColor: 'var(--border)', textUnderlineOffset: '4px' }}>
-                  Create account
+                Already have an account?{' '}
+                <Link href="/login" style={{ fontWeight: 500, color: 'var(--foreground)', textDecoration: 'underline', textDecorationColor: 'var(--border)', textUnderlineOffset: '4px' }}>
+                  Sign in
                 </Link>
               </p>
 
